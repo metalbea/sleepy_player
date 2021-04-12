@@ -46,9 +46,10 @@ public class MainActivity extends AppCompatActivity {
         buttonHelp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openDialog("With Sleepy Player you can listen to music while you're trying to fall asleep.\n\n" +
-                        "Decide how many minutes you want your music to play.\n\n" +
-                        "Your music will gradually be more silent and when the timer runs out, the music stops and your volume resets to how it was.", "Info");
+                openDialog("With Sleepy Player you can listen to music while you're trying to sleep.\n\n" +
+                        "Start your music from any application on your phone.\n\n" +
+                        "Decide how many minutes you want it to play.\n\n" +
+                        "It will gradually be more silent and when the timer runs out, the music stops and your volume resets to how it was.", "Info");
             }
         });
         buttonStop = findViewById(R.id.buttonStop);

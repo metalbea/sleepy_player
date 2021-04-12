@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Sleepy Player</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
+    <string name="buttonStartText">Start</string>
+    <string name="buttonStopText">Stop</string>
+    <string name="choose_minutes">Amount of minutes</string>
+    <string name="countdown">countdown</string>
+</resources>

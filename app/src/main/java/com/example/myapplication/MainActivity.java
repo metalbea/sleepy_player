@@ -1,9 +1,9 @@
 package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Context;
-import android.content.Intent;
 import android.icu.text.DecimalFormat;
 import android.icu.text.NumberFormat;
 import android.media.AudioManager;
@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
@@ -47,9 +46,9 @@ public class MainActivity extends AppCompatActivity {
         buttonHelp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openDialog("This app is made so that you can listen to music while you're tying to fall asleep.\n" +
-                        "Write how many minutes you want your music to play.\n" +
-                        "Your music will gradually be more silent and when the timer is at 00:00:00, the music stops and your volume is set back how it was before you pressed play.", "Info");
+                openDialog("With Sleepy Player you can listen to music while you're trying to fall asleep.\n\n" +
+                        "Decide how many minutes you want your music to play.\n\n" +
+                        "Your music will gradually be more silent and when the timer runs out, the music stops and your volume resets to how it was.", "Info");
             }
         });
         buttonStop = findViewById(R.id.buttonStop);
@@ -106,10 +105,9 @@ public class MainActivity extends AppCompatActivity {
         buttonStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
+                if(busy){
                     finishStopwatch();
                     countDownTimer.cancel();
-                } catch (Exception e) {
                 }
             }
         });
@@ -121,13 +119,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setVolume(double percent) {
-        int volume = ((int) (currentVolume * percent)) + 1;
+        int volume = ((int) (currentVolume * percent));
+        if(percent != 1){
+            volume += 1;
+        }
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
     }
 
     private void finishStopwatch() {
         busy = false;
-        countdown.setText("countdown");
+        countdown.setText("00:00:00");
         setVolume(1);
     }
 }

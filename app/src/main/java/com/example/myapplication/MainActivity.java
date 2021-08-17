@@ -31,13 +31,16 @@ public class MainActivity extends AppCompatActivity {
     private boolean busy = false;
     private boolean quit = false;
     private CountDownTimer countDownTimer;
-    ActivityMainBinding binding;
+    private EditText minutesEditText;
+    private View view;
+    private ActivityMainBinding binding;
+    private Controller controller;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
-        View view = binding.getRoot();
+        view = binding.getRoot();
         setContentView(view);
 
         audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
@@ -49,57 +52,16 @@ public class MainActivity extends AppCompatActivity {
                 openDialog("With Sleepy Player you can listen to music while you're trying to sleep.\n\n" +
                         "Start your music from any application on your phone.\n\n" +
                         "Decide how many minutes you want it to play.\n\n" +
-                        "It will gradually be more silent and when the timer runs out, the music stops and your volume resets to how it was.", "Info");
+                        "It will gradually be more silent and when the timer runs out, the music stops and your volume resets to it's initial volume.", "Info");
             }
         });
         buttonStop = findViewById(R.id.buttonStop);
-        EditText minutesEditText = findViewById(R.id.minuteTextbox);
+        minutesEditText = findViewById(R.id.minuteTextbox);
         buttonStart = findViewById(R.id.buttonStart);
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean ok = true;
-                if (!busy) {
-                    currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-                    busy = true;
-                    try {
-                        minutes = Integer.parseInt(minutesEditText.getText().toString());
-                    } catch (Exception e) {
-                        ok = false;
-                    }
-                    if (minutes < 1) {
-                        ok = false;
-                    }
-                    if (ok) {
-                        minutesInMilliseconds = TimeUnit.MINUTES.toMillis(minutes);
-                        countDownTimer = new CountDownTimer(minutesInMilliseconds, 1000) {
-                            public void onTick(long millisUntilFinished) {
-                                // Used for formatting digit to be in 2 digits only
-                                NumberFormat f = new DecimalFormat("00");
-                                long hour = (millisUntilFinished / 3600000) % 24;
-                                long min = (millisUntilFinished / 60000) % 60;
-                                long sec = (millisUntilFinished / 1000) % 60;
-                                countdown.setText(f.format(hour) + ":" + f.format(min) + ":" + f.format(sec));
-                                double percentage = (double) millisUntilFinished / (double) minutesInMilliseconds;
-                                setVolume(percentage);
-                            }
-
-                            // When the task is over it will print 00:00:00 there
-                            public void onFinish() {
-                                KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE);
-                                audioManager.dispatchMediaKeyEvent(event);
-                                while (audioManager.isMusicActive()) {
-                                    System.out.println("music is still playing");
-
-                                }
-                                finishStopwatch();
-                            }
-                        }.start();
-                    } else {
-                        openDialog("must be a number higher then 0", "Warning");
-                        busy = false;
-                    }
-                }
+                startStopwatch();
             }
         });
 
@@ -125,6 +87,52 @@ public class MainActivity extends AppCompatActivity {
             volume += 1;
         }
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+    }
+
+    private void startStopwatch(){
+        boolean ok = true;
+        if (!busy) {
+            currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+            busy = true;
+            try {
+                minutes = Integer.parseInt(minutesEditText.getText().toString());
+            } catch (Exception e) {
+                ok = false;
+            }
+            if (minutes < 1) {
+                ok = false;
+            }
+            if (ok) {
+                minutesInMilliseconds = TimeUnit.MINUTES.toMillis(minutes);
+                countDownTimer = new CountDownTimer(minutesInMilliseconds, 1000) {
+                    public void onTick(long millisUntilFinished) {
+                        // Used for formatting digit to be in 2 digits only
+                        NumberFormat f = new DecimalFormat("00");
+                        long hour = (millisUntilFinished / 3600000) % 24;
+                        long min = (millisUntilFinished / 60000) % 60;
+                        long sec = (millisUntilFinished / 1000) % 60;
+                        countdown.setText(String.format("%s:%s:%s", f.format(min), f.format(hour), f.format(sec)));
+                        double percentage = (double) millisUntilFinished / (double) minutesInMilliseconds;
+                        setVolume(percentage);
+                    }
+
+                    // When the task is over it will print 00:00:00 there
+                    public void onFinish() {
+                        KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE);
+                        audioManager.dispatchMediaKeyEvent(event);
+                        while (audioManager.isMusicActive()) {
+                            System.out.println("music is still playing");
+
+                        }
+                        finishStopwatch();
+                    }
+                }.start();
+            } else {
+                openDialog("must be a number higher then 0", "Warning");
+                busy = false;
+            }
+        }
+
     }
 
     private void finishStopwatch() {
